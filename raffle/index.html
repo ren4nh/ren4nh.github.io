@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+	<meta charset="UTF-8">
+	<title>Geração de rifas em papel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.2/css/bulma.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+</head>
+<body>
+	<section class="section">
+		<div class="container">
+			<div class="columns is-centered">
+				<div class="column is-half">
+                    <h1 class="title has-text-centered">Geração de rifas em papel</h1>
+                    
+                    <div class="notification is-success" id="success" style="display: none;">
+                        <button class="delete"></button>
+                        Rifa enviada para o email informado com sucesso
+                    </div>
+
+                    <div class="notification is-danger" id="error" style="display: none;">
+                        <button class="delete"></button>
+                        Não foi possivel gerar a rifa, tente novamente mais tarde
+                    </div>
+
+					<form action="#" method="POST">
+						<div class="field">
+							<label class="label">Email *</label>
+							<div class="control">
+								<input name="email" class="input" type="email" required placeholder="Seu email">
+							</div>
+                        </div>
+                        
+                        <div class="field">
+							<label class="label">Titulo *</label>
+							<div class="control">
+								<input name="title" class="input" type="text" required placeholder="Titulo da rifa">
+							</div>
+                        </div>
+                        
+                        <div class="field">
+							<label class="label">Valor *</label>
+							<div class="control">
+								<input name="price" class="input" type="number" required placeholder="Valor unitário">
+							</div>
+						</div>
+
+
+						<div class="field">
+							<label class="label">Descrição *</label>
+							<div class="control">
+								<textarea name="description" class="textarea" placeholder="Descrição do que será sorteado" required maxlength="200"></textarea>
+							</div>
+                        </div>
+                        
+                        <div class="field">
+							<label class="label">Total *</label>
+							<div class="control">
+								<input name="total" class="input" type="number" required placeholder="Total de numeros a serem gerados">
+							</div>
+						</div>
+
+						<div class="field is-grouped">
+							<div class="control">
+								<button class="button is-link is-medium" type="submit">Gerar</button>
+							</div>
+						</div>
+					</form>
+
+				</div>
+			</div>
+		</div>
+    </section>
+    <script>
+        $(document).ready(function(){
+
+            (function ($) {
+                $.fn.serializeFormJSON = function () {
+
+                    var o = {};
+                    var a = this.serializeArray();
+                    $.each(a, function () {
+                        if (o[this.name]) {
+                            if (!o[this.name].push) {
+                                o[this.name] = [o[this.name]];
+                            }
+                            o[this.name].push(this.value || '');
+                        } else {
+                            o[this.name] = this.value || '';
+                        }
+                    });
+                    return o;
+                };
+            })(jQuery);
+            
+            $(".delete").click(function() {
+                $(".notification").hide();
+            })
+
+            $("form").submit(function(e) {
+                e.preventDefault();
+                var data = $(this).serializeFormJSON();
+                $.ajax({
+                    type: "POST",
+                    url: "https://g5a7bntsif.execute-api.us-east-1.amazonaws.com/default/raffle",
+                    dataType: 'text json',
+                    contentType: "application/json", 
+                    data: JSON.stringify(data), 
+                    success: function(response) { 
+                        if(response.statusCode == 200) {
+                            $("#success").show();
+                        } else {
+                            $("#error").show();
+                        }
+                    },
+                    error: function(response) {
+                        $("#error").show();
+                    }
+                });
+            });
+
+        });
+
+    </script>
+</body>
+</html>
