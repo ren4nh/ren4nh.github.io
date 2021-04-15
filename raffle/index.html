@@ -23,14 +23,7 @@
                         Não foi possivel gerar a rifa, tente novamente mais tarde
                     </div>
 
-					<form action="#" method="POST">
-						<div class="field">
-							<label class="label">Email *</label>
-							<div class="control">
-								<input name="email" class="input" type="email" required placeholder="Seu email">
-							</div>
-                        </div>
-                        
+					<form action="#" method="POST">                        
                         <div class="field">
 							<label class="label">Titulo *</label>
 							<div class="control">
@@ -97,6 +90,14 @@
                 $(".notification").hide();
             })
 
+            function downloadBase64File(contentType, base64Data, fileName) {
+                const linkSource = `data:${contentType};base64,${base64Data}`;
+                const downloadLink = document.createElement("a");
+                downloadLink.href = linkSource;
+                downloadLink.download = fileName;
+                downloadLink.click();
+            }
+
             $("form").submit(function(e) {
                 e.preventDefault();
                 var data = $(this).serializeFormJSON();
@@ -107,8 +108,9 @@
                     contentType: "application/json", 
                     data: JSON.stringify(data), 
                     success: function(response) { 
-                        if(response.statusCode == 200) {
+                        if(response.success) {
                             $("#success").show();
+                            downloadBase64File("application/pdf", response.data, "raffle.pdf");
                         } else {
                             $("#error").show();
                         }
