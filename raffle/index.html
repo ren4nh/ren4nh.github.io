@@ -105,10 +105,10 @@
             }
 
             $("form").submit(function(e) {
+                e.preventDefault();
+                var data = $("form").serializeFormJSON();
                 $("#progress").show();
                 $("#fields").attr("disabled", true);
-                e.preventDefault();
-                var data = $(this).serializeFormJSON();
                 $.ajax({
                     type: "POST",
                     url: "https://g5a7bntsif.execute-api.us-east-1.amazonaws.com/default/raffle",
@@ -123,13 +123,16 @@
                         } else {
                             $("#error").show();
                         }
+                        $("#progress").hide();
+                        $("#fields").removeAttr("disabled");
                     },
                     error: function(response) {
                         $("#error").show();
+                        $("#progress").hide();
+                        $("#fields").removeAttr("disabled");
                     }
                 });
-                $("#progress").hide();
-                $("#fields").removeAttr("disabled");
+                
             });
 
         });
