@@ -15,7 +15,7 @@
                     
                     <div class="notification is-success" id="success" style="display: none;">
                         <button class="delete"></button>
-                        Rifa enviada para o email informado com sucesso
+                        Rifa gerada com sucesso
                     </div>
 
                     <div class="notification is-danger" id="error" style="display: none;">
@@ -23,46 +23,52 @@
                         Não foi possivel gerar a rifa, tente novamente mais tarde
                     </div>
 
-					<form action="#" method="POST">                        
-                        <div class="field">
-							<label class="label">Titulo *</label>
-							<div class="control">
-								<input name="title" class="input" type="text" required placeholder="Titulo da rifa">
-							</div>
-                        </div>
-                        
-                        <div class="field">
-							<label class="label">Valor *</label>
-							<div class="control">
-								<input name="price" class="input" type="number" required placeholder="Valor unitário">
-							</div>
-						</div>
+                    <h4 class="subtitle has-text-centered">Preencha o formulário abaixo para gerar a sua rifa</h4>
+
+                    <form action="#" method="POST">      
+                        <fieldset id="fields">               
+                            <div class="field">
+                                <label class="label">Titulo *</label>
+                                <div class="control">
+                                    <input name="title" class="input" type="text" required placeholder="Titulo da rifa">
+                                </div>
+                            </div>
+                            
+                            <div class="field">
+                                <label class="label">Valor *</label>
+                                <div class="control">
+                                    <input name="price" class="input" type="number" required placeholder="Valor unitário">
+                                </div>
+                            </div>
 
 
-						<div class="field">
-							<label class="label">Descrição *</label>
-							<div class="control">
-								<textarea name="description" class="textarea" placeholder="Descrição do que será sorteado" required maxlength="200"></textarea>
-							</div>
-                        </div>
-                        
-                        <div class="field">
-							<label class="label">Total *</label>
-							<div class="control">
-								<input name="total" class="input" type="number" required placeholder="Total de numeros a serem gerados">
-							</div>
-						</div>
+                            <div class="field">
+                                <label class="label">Descrição *</label>
+                                <div class="control">
+                                    <textarea name="description" class="textarea" placeholder="Descrição do que será sorteado" required maxlength="200"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="field">
+                                <label class="label">Total *</label>
+                                <div class="control">
+                                    <input name="total" class="input" type="number" required placeholder="Total de numeros a serem gerados">
+                                </div>
+                            </div>
 
-						<div class="field is-grouped">
-							<div class="control">
-								<button class="button is-link is-medium" type="submit">Gerar</button>
-							</div>
-						</div>
-					</form>
-
-				</div>
-			</div>
-		</div>
+                            <div class="field is-grouped">
+                                <div class="control">
+                                    <button id="generate" class="button is-link is-medium" type="submit">Gerar</button>
+                                </div>
+                                <div class="column">
+                                    <progress id="progress" class="progress is-small is-primary" max="100" style="display: none;">30%</progress>
+                                </div>
+                            </div>
+                        </fieldset>   
+                    </form>
+                </div>
+            </div>
+        </div>
     </section>
     <script>
         $(document).ready(function(){
@@ -99,6 +105,8 @@
             }
 
             $("form").submit(function(e) {
+                $("#progress").show();
+                $("#fields").attr("disabled", true);
                 e.preventDefault();
                 var data = $(this).serializeFormJSON();
                 $.ajax({
@@ -111,6 +119,7 @@
                         if(response.success) {
                             $("#success").show();
                             downloadBase64File("application/pdf", response.data, "raffle.pdf");
+                            $("form").trigger("reset");
                         } else {
                             $("#error").show();
                         }
@@ -119,6 +128,8 @@
                         $("#error").show();
                     }
                 });
+                $("#progress").hide();
+                $("#fields").removeAttr("disabled");
             });
 
         });
