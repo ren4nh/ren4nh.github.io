@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gerador de Rifas</title>
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e2e0d8;
+    --text: #1a1a18;
+    --muted: #6b6960;
+    --accent: #1a1a18;
+    --accent-text: #ffffff;
+    --danger: #c0392b;
+    --radius: 10px;
+    --font: 'Georgia', serif;
+    --sans: system-ui, -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    padding: 2rem 1rem;
+  }
+
+  .page { max-width: 660px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 2.5rem; }
+  header h1 { font-family: var(--font); font-size: 2rem; font-weight: normal; letter-spacing: -0.02em; }
+  header p { font-size: 14px; color: var(--muted); margin-top: 6px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+  }
+
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 13px; color: var(--muted); }
+
+  input, textarea, select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-size: 14px;
+    font-family: var(--sans);
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: #999; }
+  textarea { resize: vertical; min-height: 72px; }
+
+  /* Preview do bilhete */
+  .preview-area {
+    background: #f0ede6;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .preview-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .ticket {
+    display: flex;
+    border: 1.5px solid #b0a898;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    max-width: 500px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  }
+
+  .canhoto {
+    width: 38%;
+    min-width: 38%;
+    background: #f7f5f0;
+    border-right: 2px dashed #c8bfb0;
+    padding: 12px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .canhoto-top { display: flex; align-items: baseline; gap: 6px; }
+  .canhoto-label { font-size: 10px; color: #999; text-transform: uppercase; letter-spacing: 0.08em; }
+  .canhoto-num { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1; font-family: var(--font); }
+  .canhoto-titulo { font-size: 10px; color: var(--muted); line-height: 1.4; }
+  .campo { margin-top: 6px; }
+  .campo-label { font-size: 9px; color: #aaa; text-transform: uppercase; letter-spacing: 0.07em; }
+  .campo-linha { height: 1px; background: #ccc; margin-top: 8px; }
+
+  .recibo {
+    flex: 1;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .recibo-header { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+  .recibo-titulo { font-size: 13px; font-weight: 600; color: var(--text); }
+  .recibo-num { font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .recibo-sep { height: 1px; background: #eee; }
+  .recibo-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .recibo-valor { font-size: 11px; font-weight: 600; color: var(--text); }
+  .recibo-contato { font-size: 10px; color: #aaa; margin-top: auto; padding-top: 4px; }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    justify-content: space-between;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    margin-bottom: 1.25rem;
+  }
+  .stat { font-size: 13px; color: var(--muted); }
+  .stat strong { color: var(--text); }
+
+  /* Botão */
+  .btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: var(--accent-text);
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 0.15s;
+    font-family: var(--sans);
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .status {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 20px;
+  }
+  .status.error { color: var(--danger); }
+  .status.success { color: #2e7d32; }
+
+  /* Progress bar */
+  .progress-wrap { display: none; margin-top: 12px; }
+  .progress-wrap.visible { display: block; }
+  .progress-bar { height: 3px; background: #e0e0e0; border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; width: 0%; }
+
+  footer { text-align: center; margin-top: 2rem; font-size: 12px; color: #bbb; }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <h1>Gerador de Rifas</h1>
+    <p>Preencha os dados e baixe o PDF pronto para imprimir</p>
+  </header>
+
+  <div class="card">
+    <div class="card-title">Dados da rifa</div>
+    <div class="grid">
+      <div class="field full">
+        <label>Nome / título da rifa</label>
+        <input type="text" id="titulo" placeholder="Ex: Rifa do churrasco" oninput="updatePreview()">
+      </div>
+      <div class="field full">
+        <label>Descrição do prêmio</label>
+        <textarea id="descricao" placeholder="Ex: 1 cesta de Natal completa, sorteio dia 25/12" oninput="updatePreview()"></textarea>
+      </div>
+      <div class="field">
+        <label>Valor por bilhete (R$)</label>
+        <input type="number" id="valor" placeholder="10,00" min="0" step="0.01" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Quantidade de bilhetes</label>
+        <input type="number" id="qtd" value="100" min="1" max="5000" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Número inicial</label>
+        <input type="number" id="numInicial" value="1" min="0" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Bilhetes por página</label>
+        <select id="porPagina" onchange="updatePreview()">
+          <option value="4">4 por página</option>
+          <option value="6" selected>6 por página</option>
+          <option value="8">8 por página</option>
+          <option value="10">10 por página</option>
+        </select>
+      </div>
+      <div class="field full">
+        <label>Contato do organizador (opcional)</label>
+        <input type="text" id="contato" placeholder="Ex: (48) 99999-9999 — João" oninput="updatePreview()">
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-area">
+    <div class="preview-label">Pré-visualização do bilhete</div>
+    <div class="ticket">
+      <div class="canhoto">
+        <div class="canhoto-top">
+          <span class="canhoto-label">Nº</span>
+          <span class="canhoto-num" id="pv-cnum">001</span>
+        </div>
+        <div class="canhoto-titulo" id="pv-ctitulo">Nome da rifa</div>
+        <div class="campo">
+          <div class="campo-label">Nome</div>
+          <div class="campo-linha"></div>
+        </div>
+        <div class="campo">
+          <div class="campo-label">Telefone</div>
+          <div class="campo-linha"></div>
+        </div>
+      </div>
+      <div class="recibo">
+        <div class="recibo-header">
+          <div class="recibo-titulo" id="pv-rtitulo">Nome da rifa</div>
+          <div class="recibo-num" id="pv-rnum">Nº 001</div>
+        </div>
+        <div class="recibo-sep"></div>
+        <div class="recibo-desc" id="pv-rdesc">Descrição do prêmio aparece aqui</div>
+        <div class="recibo-valor" id="pv-rvalor" style="display:none;"></div>
+        <div class="recibo-contato" id="pv-rcontato" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <span class="stat">Bilhetes: <strong id="st-qtd">100</strong></span>
+    <span class="stat">Páginas: <strong id="st-pags">17</strong></span>
+    <span class="stat">Numeração: <strong id="st-range">001–100</strong></span>
+  </div>
+
+  <button class="btn" id="btn-gerar" onclick="gerarPDF()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="12" y1="18" x2="12" y2="12"/>
+      <line x1="9" y1="15" x2="15" y2="15"/>
+    </svg>
+    Gerar PDF
+  </button>
+
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  </div>
+
+  <div class="status" id="status"></div>
+
+  <footer>Gerador de Rifas &mdash; todos os dados são processados de forma segura</footer>
+</div>
+
+<script>
+  // ⚠️  ALTERE esta URL para a URL do seu API Gateway após o deploy
+  const API_URL = "https://n7b71atpoe.execute-api.us-east-1.amazonaws.com/rifa";
+
+  function pad(n, len) { return String(n).padStart(len, '0'); }
+
+  function updatePreview() {
+    const titulo = document.getElementById('titulo').value || 'Nome da rifa';
+    const desc   = document.getElementById('descricao').value || 'Descrição do prêmio aparece aqui';
+    const valor  = document.getElementById('valor').value;
+    const qtd    = parseInt(document.getElementById('qtd').value) || 100;
+    const ni     = parseInt(document.getElementById('numInicial').value) || 1;
+    const pp     = parseInt(document.getElementById('porPagina').value) || 6;
+    const contato = document.getElementById('contato').value;
+
+    const nf     = ni + qtd - 1;
+    const digs   = Math.max(3, String(nf).length);
+    const ns     = pad(ni, digs);
+
+    document.getElementById('pv-cnum').textContent    = ns;
+    document.getElementById('pv-ctitulo').textContent = titulo;
+    document.getElementById('pv-rnum').textContent    = 'Nº ' + ns;
+    document.getElementById('pv-rtitulo').textContent = titulo;
+    document.getElementById('pv-rdesc').textContent   = desc;
+
+    const ve = document.getElementById('pv-rvalor');
+    if (valor) { ve.textContent = 'Valor: R$ ' + parseFloat(valor).toFixed(2).replace('.', ','); ve.style.display = ''; }
+    else ve.style.display = 'none';
+
+    const ce = document.getElementById('pv-rcontato');
+    if (contato) { ce.textContent = 'Contato: ' + contato; ce.style.display = ''; }
+    else ce.style.display = 'none';
+
+    document.getElementById('st-qtd').textContent   = qtd;
+    document.getElementById('st-pags').textContent  = Math.ceil(qtd / pp);
+    document.getElementById('st-range').textContent = pad(ni, digs) + '–' + pad(nf, digs);
+  }
+
+  async function gerarPDF() {
+    const titulo = document.getElementById('titulo').value.trim();
+    if (!titulo) { setStatus('Preencha o nome da rifa.', 'error'); return; }
+
+    const qtd = parseInt(document.getElementById('qtd').value) || 100;
+    if (qtd > 5000) { setStatus('Máximo de 5000 bilhetes por PDF.', 'error'); return; }
+
+    const valor = document.getElementById('valor').value;
+    const valorStr = valor ? 'R$ ' + parseFloat(valor).toFixed(2).replace('.', ',') : '';
+
+    const payload = {
+      titulo,
+      descricao:  document.getElementById('descricao').value,
+      valor:      valorStr,
+      qtd,
+      numInicial: parseInt(document.getElementById('numInicial').value) || 1,
+      porPagina:  parseInt(document.getElementById('porPagina').value) || 6,
+      contato:    document.getElementById('contato').value,
+    };
+
+    const btn = document.getElementById('btn-gerar');
+    btn.disabled = true;
+    setStatus('Gerando PDF...');
+    animateProgress();
+
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || 'Erro ao gerar PDF');
+
+      // Converte base64 → Blob → download
+      const bytes = Uint8Array.from(atob(json.pdf), c => c.charCodeAt(0));
+      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href     = url;
+      a.download = `rifa_${titulo.replace(/\s+/g, '_').toLowerCase()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+
+      setStatus('PDF gerado com sucesso! O download iniciou automaticamente.', 'success');
+    } catch (err) {
+      setStatus('Erro: ' + err.message, 'error');
+    } finally {
+      btn.disabled = false;
+      stopProgress();
+    }
+  }
+
+  function setStatus(msg, type = '') {
+    const el = document.getElementById('status');
+    el.textContent = msg;
+    el.className = 'status ' + type;
+  }
+
+  let progressInterval = null;
+  function animateProgress() {
+    const wrap = document.getElementById('progress-wrap');
+    const fill = document.getElementById('progress-fill');
+    wrap.classList.add('visible');
+    fill.style.width = '0%';
+    let pct = 0;
+    progressInterval = setInterval(() => {
+      pct = Math.min(pct + Math.random() * 8, 85);
+      fill.style.width = pct + '%';
+    }, 200);
+  }
+  function stopProgress() {
+    clearInterval(progressInterval);
+    const fill = document.getElementById('progress-fill');
+    fill.style.width = '100%';
+    setTimeout(() => {
+      document.getElementById('progress-wrap').classList.remove('visible');
+      fill.style.width = '0%';
+    }, 600);
+  }
+
+  updatePreview();
+</script>
+</body>
+</html>
