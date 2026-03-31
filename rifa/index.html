@@ -222,7 +222,6 @@
           <option value="4">4 por página</option>
           <option value="6" selected>6 por página</option>
           <option value="8">8 por página</option>
-          <option value="10">10 por página</option>
         </select>
       </div>
       <div class="field full">
@@ -372,12 +371,24 @@
       URL.revokeObjectURL(url);
 
       setStatus('PDF gerado com sucesso! O download iniciou automaticamente.', 'success');
+      limparCampos();
     } catch (err) {
       setStatus('Erro: ' + err.message, 'error');
     } finally {
       btn.disabled = false;
       stopProgress();
     }
+  }
+
+  function limparCampos() {
+    document.getElementById('titulo').value = '';
+    document.getElementById('descricao').value = '';
+    document.getElementById('valor').value = '';
+    document.getElementById('qtd').value = '100';
+    document.getElementById('numInicial').value = '1';
+    document.getElementById('porPagina').value = '6';
+    document.getElementById('contato').value = '';
+    updatePreview();
   }
 
   function setStatus(msg, type = '') {
